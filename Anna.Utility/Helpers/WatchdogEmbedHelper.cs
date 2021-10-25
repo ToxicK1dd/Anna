@@ -1,0 +1,46 @@
+﻿// Copyright (c) 2021 ToxicK1dd
+// Copyright (C) 2021 Project Contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+using DSharpPlus.Entities;
+
+namespace Anna.Utility.Helpers
+{
+    public static class WatchdogEmbedHelper
+    {
+        public static DiscordEmbedBuilder GetAutoKickLogMessage(DiscordMember member, DiscordGuild guild, string reason)
+        {
+            return new DiscordEmbedBuilder()
+            {
+                Title = "Automatisk Kicked",
+                Description = $"{member.DisplayName}#{member.Discriminator} er smidt ud automatisk.",
+                // Border
+                Color = new DiscordColor(104, 194, 175),
+                // Thumbnail
+                Thumbnail = new()
+                {
+                    Url = "https://i.imgur.com/jSML0Zl.png"
+                }
+            }.AddField("Bruger | ID", $"{member.DisplayName}#{member.Discriminator} | {member.Id}", false)
+            .AddField("Server | ID", $"{guild.Name} | {guild.Id}", false)
+            .AddField("Grund", reason, false);
+        }
+    }
+}

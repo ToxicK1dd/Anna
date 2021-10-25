@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DSharpPlus" Version="4.0.1" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.1" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.1" />
+    <PackageReference Include="QRCoder" Version="1.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Anna.DataAccess\Anna.DataAccess.csproj" />
+    <ProjectReference Include="..\Anna.Localization\Anna.Localization.csproj" />
+    <ProjectReference Include="..\Anna.Model\Anna.Model.csproj" />
+    <ProjectReference Include="..\Anna.Utility\Anna.Utility.csproj" />
+    <ProjectReference Include="..\Anna.WebService\Anna.WebService.csproj" />
+  </ItemGroup>
+
+</Project>
