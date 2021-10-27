@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading;
 using System;
 
 namespace Anna.DataAccess.Repository.Base
@@ -40,17 +41,24 @@ namespace Anna.DataAccess.Repository.Base
         }
 
 
-        public virtual async Task AddAsync(TModel t)
+        public virtual async Task AddAsync(
+            TModel model,
+            CancellationToken cancellationToken = default)
         {
-            await context.Set<TModel>().AddAsync(t);
+            await context.Set<TModel>().AddAsync(model, cancellationToken);
         }
 
-        public virtual async Task<TModel> FirstOrDefaultAsync(Expression<Func<TModel, bool>> predicate)
+
+        public virtual async Task<TModel> FirstOrDefaultAsync(
+            Expression<Func<TModel, bool>> predicate,
+            CancellationToken cancellationToken = default)
         {
-            return await context.Set<TModel>().FirstOrDefaultAsync(predicate);
+            return await context.Set<TModel>().FirstOrDefaultAsync(predicate, cancellationToken);
         }
 
-        public virtual async Task<TModel> FirstOrDefaultAsync(Expression<Func<TModel, bool>> predicate,
+        public virtual async Task<TModel> FirstOrDefaultAsync(
+            Expression<Func<TModel, bool>> predicate,
+            CancellationToken cancellationToken = default,
             params Expression<Func<TModel, object>>[] includes)
         {
             IQueryable<TModel> query = context.Set<TModel>().AsQueryable();
@@ -58,12 +66,32 @@ namespace Anna.DataAccess.Repository.Base
             foreach (var include in includes)
                 query = query.Include(include);
 
-            return await query.FirstOrDefaultAsync(predicate);
+            return await query.FirstOrDefaultAsync(predicate, cancellationToken);
         }
 
-        public virtual IEnumerable<TModel> Get(Expression<Func<TModel, bool>> predicate)
+        public virtual async Task<TModel> FirstOrDefaultAsync(
+            Expression<Func<TModel, bool>> predicate,
+            Expression<Func<TModel, TModel>> selector,
+            CancellationToken cancellationToken = default)
+        {
+            return await context.Set<TModel>()
+                .Where(predicate)
+                .Select(selector)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+
+        public virtual IEnumerable<TModel> Get(
+            Expression<Func<TModel, bool>> predicate)
         {
             return context.Set<TModel>().Where(predicate);
+        }
+
+        public virtual async Task<TModel> GetByIdAsync(
+            ulong id,
+            CancellationToken cancellationToken = default)
+        {
+            return await context.Set<TModel>().FindAsync(id, cancellationToken);
         }
 
         public virtual IEnumerable<TModel> GetAll()
@@ -71,19 +99,45 @@ namespace Anna.DataAccess.Repository.Base
             return context.Set<TModel>().AsQueryable();
         }
 
-        public virtual async Task<TModel> GetByIdAsync(ulong id)
+        public virtual async Task<IEnumerable<TModel>> GetAllAsync(
+            Expression<Func<TModel, TModel>> keySelector,
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken = default)
         {
-            return await context.Set<TModel>().FindAsync(id);
+            return await context.Set<TModel>()
+                .OrderBy(keySelector)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
         }
+
+        public virtual async Task<IEnumerable<TModel>> GetAllAsync(
+            Expression<Func<TModel, TModel>> keySelector,
+            Expression<Func<TModel, bool>> predicate,
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken = default)
+        {
+            return await context.Set<TModel>()
+                .Where(predicate)
+                .OrderBy(keySelector)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+        }
+
 
         public virtual void Remove(TModel t)
         {
             context.Set<TModel>().Remove(t);
         }
 
-        public virtual async Task<bool> ExistsAsync(ulong id)
+        public virtual async Task<bool> ExistsAsync(
+            ulong id,
+            CancellationToken cancellationToken = default)
         {
-            return await context.Set<TModel>().FindAsync(id) != null;
+            return await context.Set<TModel>().FindAsync(id, cancellationToken) != null;
         }
     }
 }

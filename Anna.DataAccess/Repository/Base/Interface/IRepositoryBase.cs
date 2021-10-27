@@ -22,6 +22,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using System.Threading;
 using System;
 
 namespace Anna.DataAccess.Repository.Base.Interface
@@ -31,15 +32,19 @@ namespace Anna.DataAccess.Repository.Base.Interface
         /// <summary>
         /// Add a <see cref="TModel"/> to the database.
         /// </summary>
-        /// <param name="t"></param>
-        Task AddAsync(TModel t);
+        /// <param name="model"></param>
+        Task AddAsync(
+            TModel model, 
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get an object by predicate.
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        Task<TModel> FirstOrDefaultAsync(Expression<Func<TModel, bool>> predicate);
+        Task<TModel> FirstOrDefaultAsync(
+            Expression<Func<TModel, bool>> predicate,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get an object by predicate, and with specified navigation properties.
@@ -47,15 +52,38 @@ namespace Anna.DataAccess.Repository.Base.Interface
         /// <param name="predicate"></param>
         /// <param name="includeProperties"></param>
         /// <returns></returns>
-        Task<TModel> FirstOrDefaultAsync(Expression<Func<TModel, bool>> predicate,
+        Task<TModel> FirstOrDefaultAsync(
+            Expression<Func<TModel, bool>> predicate,
+            CancellationToken cancellationToken = default,
             params Expression<Func<TModel, object>>[] includeProperties);
+
+        /// <summary>
+        /// Get an object with specific properties by predicate.
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <param name="selector"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TModel> FirstOrDefaultAsync(
+            Expression<Func<TModel, bool>> predicate,
+            Expression<Func<TModel, TModel>> selector,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get all objects by predicate.
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        IEnumerable<TModel> Get(Expression<Func<TModel, bool>> predicate);
+        IEnumerable<TModel> Get(
+            Expression<Func<TModel, bool>> predicate);
+
+        /// <summary>
+        /// Get an object by id.
+        /// </summary>
+        /// <param name="id"></param>
+        Task<TModel> GetByIdAsync(
+            ulong id,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get all objects.
@@ -64,23 +92,49 @@ namespace Anna.DataAccess.Repository.Base.Interface
         IEnumerable<TModel> GetAll();
 
         /// <summary>
-        /// Get an object by id.
+        /// Get all with a specific page size, and index.
         /// </summary>
-        /// <param name="id"></param>
-        Task<TModel> GetByIdAsync(ulong id);
+        /// <param name="keySelector">Property which to sort by.</param>
+        /// <param name="pageNumber">The page which to index.</param>
+        /// <param name="pageSize">How many entries per page.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<IEnumerable<TModel>> GetAllAsync(
+            Expression<Func<TModel, TModel>> keySelector,
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get all by predicate with a specific page size, and index
+        /// </summary>
+        /// <param name="keySelector">Property which to sort by.</param>
+        /// <param name="predicate"></param>
+        /// <param name="pageNumber">The page which to index.</param>
+        /// <param name="pageSize">How many entries per page.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<IEnumerable<TModel>> GetAllAsync(
+            Expression<Func<TModel, TModel>> keySelector,
+            Expression<Func<TModel, bool>> predicate,
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes an object.
         /// and saves the changes.
         /// </summary>
-        /// <param name="t"></param>
-        void Remove(TModel t);
+        /// <param name="model"></param>
+        void Remove(TModel model);
 
         /// <summary>
         /// Check if an object with the specified id exists.
         /// </summary>
         /// <param name="id"></param>
         /// <returns>A boolean value indicating the existance of an object</returns>
-        Task<bool> ExistsAsync(ulong id);
+        Task<bool> ExistsAsync(
+            ulong id, 
+            CancellationToken cancellationToken = default);
     }
 }
