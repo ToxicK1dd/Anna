@@ -21,7 +21,6 @@
 
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.Interactivity;
 using DSharpPlus;
 using Anna.DiscordBot.Config.Interface;
 using Microsoft.Extensions.Configuration;
@@ -68,26 +67,18 @@ namespace Anna.DiscordBot.Config
                 CaseSensitive = false
             });
 
+            // Register commands, and command error handler
+            commands.RegisterCommands(Assembly.Load("Anna.Commands"));
+            foreach (var item in commands)
+                item.Value.CommandErrored += CommandErrored;
+
             // Setup Interactivity configuration
-            IReadOnlyDictionary<int, InteractivityExtension> interactivity = await client.UseInteractivityAsync(new()
+            await client.UseInteractivityAsync(new()
             {
                 PaginationBehaviour = DSharpPlus.Interactivity.Enums.PaginationBehaviour.Ignore,
                 PaginationDeletion = DSharpPlus.Interactivity.Enums.PaginationDeletion.KeepEmojis,
                 PollBehaviour = DSharpPlus.Interactivity.Enums.PollBehaviour.KeepEmojis,
             });
-
-            /*
-             * RegisterCommands does not support IReadOnlyDictionary<int, CommandsNextExtension>,
-             * so i have to do it this way. Even though there are only one item in commands.Values.
-             */
-            foreach(CommandsNextExtension item in commands.Values)
-            {
-                // Register commands.
-                item.RegisterCommands(Assembly.Load("Anna.Commands"));
-
-                // Register event handler.
-                item.CommandErrored += CommandErrored;
-            }
 
             // Return client
             return client;
@@ -99,7 +90,7 @@ namespace Anna.DiscordBot.Config
         {
             try
             {
-                if(e.Command != null)
+                if (e.Command != null)
                 {
                     // Log error message.
                     extension.Client.Logger.Log(
@@ -118,7 +109,7 @@ namespace Anna.DiscordBot.Config
 
                 return Task.CompletedTask;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // Log error message.
                 extension.Client.Logger.Log(LogLevel.Error, new EventId(101, "CmdError"), ex.Message);
