@@ -20,9 +20,9 @@
 // SOFTWARE.
 
 using Anna.WebService.WebServices.Base.Interface;
-using System.IO;
-using System.Net;
+using RestSharp;
 using System.Threading.Tasks;
+using System.Threading;
 using System;
 
 namespace Anna.WebService.WebServices.Base
@@ -35,31 +35,23 @@ namespace Anna.WebService.WebServices.Base
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public virtual async Task<string> CallWebApiAsync(string url)
+        public virtual async Task<(bool, string)> CallWebApiAsync(
+            string url, 
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                // Create a HttpWebRequest
-                HttpWebRequest httpWebRequest = WebRequest.CreateHttp(url);
-                // Set method to get
-                httpWebRequest.Method = WebRequestMethods.Http.Get;
-                // Set accept headers
-                httpWebRequest.Accept = "application/json";
+                // Instantiate new client with target endpoint
+                RestClient client = new(url);
 
-                // String for storing the json data retrieved from the endpoint
-                string result;
+                // Instantiate new request, and set parameters
+                RestRequest request = new("", Method.GET, DataFormat.Json);
 
-                // Get response from the website
-                using(HttpWebResponse response = await httpWebRequest.GetResponseAsync() as HttpWebResponse)
-                {
-                    // Read the response
-                    using StreamReader sr = new StreamReader(response.GetResponseStream());
-                    // Assign the response data to the result variable
-                    result = await sr.ReadToEndAsync();
-                };
+                // Get response from target endpoint
+                IRestResponse response = await client.ExecuteAsync(request, cancellationToken);
 
-                // Return the retrieved JSON data.
-                return result;
+                // Return response content
+                return (response.IsSuccessful, response.Content);
             }
             catch(Exception)
             {
@@ -74,21 +66,21 @@ namespace Anna.WebService.WebServices.Base
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public string CallWebApi(string url)
+        public virtual (bool, string) CallWebApi(string url)
         {
             try
             {
-                // string for storing the result
-                string result = string.Empty;
+                // Instantiate new client with target endpoint
+                RestClient client = new(url);
 
-                // Use WebClient to download the data
-                using(WebClient client = new WebClient())
-                {
-                    result = client.DownloadString(url);
-                }
+                // Instantiate new request, and set parameters
+                RestRequest request = new("", Method.GET, DataFormat.Json);
 
-                // Return the retrieved data.
-                return result;
+                // Get response from target endpoint
+                IRestResponse response = client.Execute(request);
+
+                // Return response content
+                return (response.IsSuccessful, response.Content);
             }
             catch(Exception)
             {

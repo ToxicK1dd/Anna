@@ -20,12 +20,15 @@
 // SOFTWARE.
 
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Anna.WebService.WebServices.Base.Interface
 {
     public interface IWebServiceBase
     {
-        Task<string> CallWebApiAsync(string url);
-        string CallWebApi(string url);
+        Task<(bool, string)> CallWebApiAsync(
+            string url,
+            CancellationToken cancellationToken = default);
+        (bool, string) CallWebApi(string url);
     }
 }
